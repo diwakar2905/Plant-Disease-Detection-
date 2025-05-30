@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Plant Disease Detection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Styles and fonts as per your template -->
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:700,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    /* Add global body styles for better typography and centering */
+    body {
+      font-family: 'Poppins', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f4f8fb;
+      margin: 0;
+      padding: 0;
+      text-align: center; /* Center content by default, specific elements will override */
+    }
+
+    /* Ensure main sections take up full width and have appropriate padding */
+    .input-section {
+      background: #f4f8fb;
+      padding: 60px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .input-container {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08), 
+                  0 2px 8px rgba(0,0,0,0.04);
+      padding: 40px;
+      max-width: 700px;
+      width: 100%; /* Use 100% width within max-width */
+      margin: 0 auto;
+      text-align: center;
+      border: 1px solid rgba(192, 217, 63, 0.1);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* Center content vertically */
+    }
+
+    .input-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1), 
+                  0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .input-container h2 {
+      color: #335c67;
+      margin-bottom: 16px; /* Adjusted margin */
+      font-size: 2rem; /* Adjusted font size */
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      position: relative;
+      display: inline-block;
+      padding-bottom: 8px; /* Adjusted padding */
+    }
+
+    .input-container h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px; /* Adjusted width */
+      height: 3px;
+      background: linear-gradient(90deg, #c0d93f, #335c67);
+      border-radius: 2px;
+    }
+
+    .input-container p {
+      color: #4a6b75;
+      margin-bottom: 24px; /* Adjusted margin */
+      font-size: 1rem; /* Adjusted font size */
+      line-height: 1.5;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Input Method Toggle Styles */
+    .input-method-toggle {
+      display: flex;
+      gap: 10px; /* Adjusted gap */
+      justify-content: center;
+      margin-bottom: 24px; /* Adjusted margin */
+    }
+
+    .toggle-btn {
+      padding: 10px 20px; /* Adjusted padding */
+      border: 2px solid #c0d93f;
+      background: transparent;
+      color: #335c67;
+      border-radius: 10px; /* Adjusted border radius */
+      font-weight: 600;
+      font-size: 0.95rem; /* Adjusted font size */
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 120px; /* Adjusted min-width */
+    }
+
+    .toggle-btn:hover {
+      background: rgba(192, 217, 63, 0.1);
+    }
+
+    .toggle-btn.active {
+      background: #c0d93f;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(192, 217, 63, 0.2);
+    }
+
+    /* File Input Styles */
+    .input-group {
+      width: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 0;
+      margin-bottom: 16px; /* Add margin below input group */
+    }
+
+    .file-input-wrapper {
+      width: 100%;
+      position: relative;
+      margin-bottom: 0; /* Remove margin-bottom here */
+      max-width: 500px;
+    }
+
+    .input-group input[type="file"] {
+      width: 100%;
+      padding: 12px 48px;
+      border: 2px dashed #c0d93f;
+      border-radius: 16px;
+      background: #f8fafc;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #335c67;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      display: block;
+    }
+
+    .input-group input[type="file"]::-webkit-file-upload-button {
+      visibility: hidden;
+      width: 0;
+      padding: 0;
+    }
+
+    .input-group input[type="file"]::before {
+      content: 'Choose File';
+      position: absolute;
+      left: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #335c67;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .input-group input[type="file"]:hover::before {
+      color: #c0d93f;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #c0d93f;
+      font-size: 1.2rem;
+      pointer-events: none;
+      z-index: 2;
+      transition: color 0.3s ease;
+    }
+
+    /* Image Preview Styles */
+    .image-preview {
+      width: 100%;
+      max-width: 350px;
+      height: 220px;
+      border-radius: 16px;
+      overflow: hidden;
+      display: none;
+      margin: 20px auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      border: 3px solid #fff;
+      transition: transform 0.3s ease;
+    }
+
+    .image-preview:hover {
+      transform: scale(1.02);
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Camera Input Section Styles */
+    #cameraInput {
+      display: none;
+      text-align: center;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px; /* Add margin below camera input */
+    }
+
+    #cameraFeed {
+      max-width: 400px;
+      border-radius: 12px;
+      margin-bottom: 0;
+      transform: scaleX(-1);
+      width: 100%;
+      height: auto;
+    }
+
+    #captureBtn {
+      background: linear-gradient(135deg, #a8c23a, #c0d93f);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(192, 217, 63, 0.2);
+      /* Inherits most other styles from .predict-btn */
+      margin-bottom: 0; /* Remove margin below capture button */
+      max-width: 200px; /* Restore max-width for capture button */
+      width: auto;
+    }
+
+    #captureBtn:hover:not(:disabled) {
+       background: linear-gradient(135deg, #c0d9f3, #a8c23a);
+       transform: translateY(-2px);
+       box-shadow: 0 12px 24px rgba(192, 217, 63, 0.3);
+    }
+
+    #captureBtn:active:not(:disabled) {
+       transform: translateY(0);
+       box-shadow: 0 6px 12px rgba(192, 217, 63, 0.2);
+    }
+
+    /* Predict Button Styles */
+    .predict-btn {
+      width: 100%;
+      max-width: 500px;
+      padding: 14px 0;
+      /* Background and color handled by enabled/disabled states */
+      border: none;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-top: 0; /* Remove top margin */
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(192, 217, 63, 0.2);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-transform: uppercase;
+    }
+
+    .predict-btn:disabled {
+      background: #e0e0e0;
+      color: #9e9e9e;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .predict-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #a8c23a, #c0d93f);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(192, 217, 63, 0.3);
+    }
+
+    .predict-btn:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 6px 12px rgba(192, 217, 63, 0.2);
+    }
+
+    /* Result Section Styles */
+    #resultSection {
+      margin-top: 32px; /* Increased margin */
+      padding: 24px;
+      border-radius: 12px;
+      background: #f8fafc;
+      display: none;
+      text-align: left; /* Align text left within results */
+      width: 100%;
+      max-width: 600px; /* Added max-width */
+      margin-left: auto; /* Center block element */
+      margin-right: auto;
+    }
+
+    #resultSection.has-result {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .result-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px; /* Added gap */
+    }
+
+    .result-item {
+      display: flex;
+      align-items: flex-start; /* Align items to start */
+      gap: 12px;
+      margin-bottom: 0; /* Removed margin-bottom */
+      padding: 12px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .result-item i {
+      font-size: 1.4rem; /* Adjusted size */
+      color: var(--accent-yellow);
+      min-width: 30px; /* Ensure consistent icon width */
+      text-align: center;
+    }
+
+    .result-item .label {
+      font-weight: 600;
+      color: var(--primary-green);
+      min-width: 100px; /* Adjusted width */
+      flex-shrink: 0; /* Prevent shrinking */
+    }
+
+    .result-item .value {
+      color: var(--deep-green);
+      flex: 1;
+      word-break: break-word;
+    }
+
+    #diseaseResult {
+      color: var(--primary-green);
+      font-size: 1.2rem; /* Adjusted size */
+      font-weight: 600;
+      margin-bottom: 12px; /* Adjusted margin */
+      padding-bottom: 12px; /* Adjusted padding */
+      border-bottom: 1px solid var(--accent-yellow); /* Adjusted border */
+    }
+
+    #diseaseConfidence {
+      color: var(--deep-green);
+      font-size: 1rem; /* Adjusted size */
+      margin-bottom: 12px; /* Adjusted margin */
+    }
+
+    #diseaseAdvice {
+      color: var(--deep-green);
+      font-size: 1rem; /* Adjusted size */
+      line-height: 1.5;
+      padding: 12px; /* Adjusted padding */
+      background: #fff;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-yellow);
+      margin-top: 16px;
+    }
+
+    .error-message {
+      color: #d32f2f;
+      background: #ffebee;
+      padding: 10px; /* Adjusted padding */
+      border-radius: 8px;
+      margin: 12px 0;
+      font-weight: 500;
+      display: none;
+      text-align: center; /* Center error message */
+      width: 100%;
+    }
+
+    .error-message.show {
+      display: block;
+      animation: shake 0.5s ease;
+    }
+
+    /* Modal styles - Ensure consistency with main card */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.visible {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+      position: relative;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+      text-align: center; /* Center content */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .modal-overlay.visible .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.5rem;
+      color: #aaa;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .modal-close:hover {
+      color: #777;
+    }
+
+    .modal-content h3 {
+      color: var(--primary-green);
+      margin-bottom: 20px;
+      font-size: 1.4rem; /* Adjusted size */
+      text-align: center;
+    }
+
+    #modalResultContent {
+       width: 100%;
+       text-align: left;
+    }
+
+    .modal-result-item {
+      display: flex;
+      align-items: flex-start; /* Align items to start */
+      gap: 12px;
+      margin-bottom: 10px; /* Adjusted margin */
+      padding: 10px; /* Adjusted padding */
+      background: #f8fafc;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.03);
+    }
+
+    .modal-result-item i {
+      font-size: 1.3rem; /* Adjusted size */
+      color: var(--accent-yellow);
+      min-width: 25px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .modal-result-item .label {
+      font-weight: 600;
+      color: var(--deep-green);
+      min-width: 80px; /* Adjusted width */
+      flex-shrink: 0;
+    }
+
+    .modal-result-item .value {
+      color: var(--deep-green);
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .modal-content .error-message {
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .input-container {
+        padding: 30px 20px;
+      }
+      .input-container h2 {
+        font-size: 1.8rem;
+      }
+      .input-container p {
+        font-size: 0.95rem;
+      }
+      .toggle-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        min-width: 100px;
+      }
+      .input-group input[type="file"] {
+         padding: 10px 40px;
+         font-size: 0.9rem;
+      }
+       .input-group input[type="file"]::before {
+         left: 40px;
+       }
+      .input-icon {
+        font-size: 1.1rem;
+        left: 12px;
+      }
+      .image-preview {
+        max-width: 300px;
+        height: 180px;
+      }
+      .predict-btn {
+        font-size: 1rem;
+      }
+      #resultSection {
+        padding: 20px;
+      }
+      .result-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+      .result-item .label {
+        min-width: auto;
+      }
+      .result-item i {
+         min-width: auto;
+      }
+       .modal-content {
+         padding: 20px;
+       }
+       .modal-content h3 {
+         font-size: 1.2rem;
+       }
+       .modal-result-item {
+         flex-direction: column;
+         align-items: flex-start;
+         gap: 5px;
+         padding: 8px;
+       }
+       .modal-result-item i {
+          min-width: auto;
+       }
+       .modal-result-item .label {
+          min-width: auto;
+       }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-links">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="about.html"><i class="fas fa-leaf"></i> About Us</a>
+      <a href="crop disease detector.html" class="active"><i class="fas fa-bug"></i> Disease Detector</a>
+      <a href="contact.html"><i class="fas fa-envelope"></i> Contact</a>
+      <a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>
+    </div>
+  </nav>
+  <!-- Hero Banner -->
+  <section class="hero-banner" style="position:relative; width:100%; height:480px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:24px;">
+    <video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover; border-radius:24px; box-shadow:0px 8px 24px rgba(0,0,0,0.15);">
+      <source src="Brown Modern Agriculture Video (1).mp4" type="video/mp4">
+      <img src="your-fallback-image.jpg" alt="Agriculture Banner" style="width:100%; height:100%; object-fit:cover; border-radius:24px;">
+    </video>
+  </section>
+  <!-- Plant Disease Detection Card -->
+  <section class="input-section" id="input-section">
+    <div class="input-container">
+      <h2><i class="fas fa-bug"></i> Plant Disease Detection</h2>
+      <p style="color: #335c67; margin-bottom: 24px;">Upload a clear image of a plant leaf to detect diseases. Supported formats: JPG, PNG, JPEG. Max size: 5MB</p>
+      
+      <!-- Input Method Toggle -->
+      <div class="input-method-toggle" style="margin-bottom: 24px;">
+        <button type="button" class="toggle-btn active" id="uploadTab" onclick="toggleInputMethod('upload')">Upload Image</button>
+        <button type="button" class="toggle-btn" id="cameraTab" onclick="toggleInputMethod('camera')">Use Camera</button>
+      </div>
+
+      <form id="diseaseForm" autocomplete="off" enctype="multipart/form-data" onsubmit="event.preventDefault(); detectDisease();">
+        <div class="input-group">
+          <div class="file-input-wrapper" id="uploadInput">
+            <span class="input-icon"><i class="fas fa-image"></i></span>
+            <input type="file" id="leafImage" name="leafImage" accept="image/jpeg,image/png,image/jpg" required 
+                   onchange="previewImage(this); validateImage(this);">
+          </div>
+          <div class="image-preview" id="imagePreview">
+            <img id="previewImg" src="#" alt="Preview">
+          </div>
+          <div class="error-message" id="imageError"></div>
+        </div>
+        
+        <!-- Camera Input Section -->
+        <div id="cameraInput" style="display: none; text-align: center;">
+          <video id="cameraFeed" width="100%" height="auto" autoplay playsinline style="max-width: 400px; border-radius: 12px; margin-bottom: 16px; transform: scaleX(-1);"></video>
+          <button type="button" class="predict-btn" id="captureBtn" onclick="captureImage()" style="width: auto;"><i class="fas fa-camera"></i> Capture Photo</button>
+          <canvas id="cameraCanvas" style="display: none;"></canvas>
+          <div class="error-message" id="cameraError"></div>
+        </div>
+
+        <button type="submit" class="predict-btn" id="detectBtn" disabled>
+          <i class="fas fa-search"></i> Detect Disease
+        </button>
+
+        <section id="resultSection" aria-live="polite">
+          <div class="error-message" id="diseaseError"></div>
+          <div class="result-content">
+            <div class="result-item">
+              <i class="fas fa-bug"></i>
+              <span class="label">Disease:</span>
+              <span class="value" id="diseaseResult"></span>
+            </div>
+            <div class="result-item">
+              <i class="fas fa-chart-line"></i>
+              <span class="label">Confidence:</span>
+              <span class="value" id="diseaseConfidence"></span>
+            </div>
+            <div class="result-item">
+              <i class="fas fa-lightbulb"></i>
+              <span class="label">Advice:</span>
+              <span class="value" id="diseaseAdvice"></span>
+            </div>
+          </div>
+        </section>
+      </form>
+    </div>
+  </section>
+  <!-- Result Modal -->
+  <div id="resultModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <h3 id="modalTitle">Detection Result</h3>
+      <div id="modalResultContent">
+        <!-- Results will be populated here -->
+      </div>
+       <div class="error-message" id="modalErrorMessage"></div>
+    </div>
+  </div>
+  <script>
+    const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? 'http://127.0.0.1:5000'
+      : window.location.origin;
+
+    function previewImage(input) {
+      const preview = document.getElementById('imagePreview');
+      const previewImg = document.getElementById('previewImg');
+      const errorDiv = document.getElementById('imageError');
+      
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          preview.style.display = 'block';
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        preview.style.display = 'none';
+        previewImg.src = '#';
+      }
+    }
+
+    function validateImage(input) {
+      const errorDiv = document.getElementById('imageError');
+      const detectBtn = document.getElementById('detectBtn');
+      const file = input.files[0];
+      
+      // Reset states
+      errorDiv.classList.remove('show');
+      errorDiv.textContent = '';
+      detectBtn.disabled = true;
+      
+      if (!file) {
+        return;
+      }
+
+      // Check file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!validTypes.includes(file.type)) {
+        errorDiv.textContent = 'Please upload a valid image file (JPG, JPEG, or PNG)';
+        errorDiv.classList.add('show');
+        input.value = '';
+        return;
+      }
+
+      // Check file size (5MB max)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        errorDiv.textContent = 'Image size should be less than 5MB';
+        errorDiv.classList.add('show');
+        input.value = '';
+        return;
+      }
+
+      // If all validations pass
+      detectBtn.disabled = false;
+    }
+
+    function detectDisease() {
+      const resultSection = document.getElementById('resultSection');
+      const diseaseError = document.getElementById('diseaseError');
+      const diseaseResult = document.getElementById('diseaseResult');
+      const diseaseConfidence = document.getElementById('diseaseConfidence');
+      const diseaseAdvice = document.getElementById('diseaseAdvice');
+      const detectBtn = document.getElementById('detectBtn');
+      const fileInput = document.getElementById('leafImage');
+
+      // Reset states
+      diseaseError.classList.remove('show');
+      diseaseError.textContent = '';
+      diseaseResult.textContent = '';
+      diseaseConfidence.textContent = '';
+      diseaseAdvice.textContent = '';
+      resultSection.classList.remove('has-result');
+      detectBtn.disabled = true;
+      detectBtn.innerHTML = '<span class="loader"></span> Detecting...';
+
+      if (!fileInput.files.length) {
+        diseaseError.textContent = "Please upload an image.";
+        diseaseError.classList.add('show');
+        detectBtn.disabled = false;
+        detectBtn.innerHTML = '<i class="fas fa-search"></i> Detect Disease';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('leafImage', fileInput.files[0]);
+
+      fetch(`${API_URL}/detect-disease`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Backend Response:', data);
+
+        if (data.error) {
+          // Display error in the modal
+          const modalErrorMessage = document.getElementById('modalErrorMessage');
+          modalErrorMessage.textContent = data.error;
+          modalErrorMessage.classList.add('show');
+          
+          // Hide main result section and show modal
+          document.getElementById('resultSection').classList.remove('has-result');
+          document.getElementById('resultModal').classList.add('visible');
+
+          throw new Error(data.error); // Propagate error to the catch block
+        }
+        
+        // Hide the original result section
+        document.getElementById('resultSection').classList.remove('has-result');
+
+        // Show results in the modal
+        showResultModal(data.disease, data.confidence, data.advice);
+
+      })
+      .catch(error => {
+        console.error('Fetch Error:', error);
+        // Display error in the modal
+        const modalErrorMessage = document.getElementById('modalErrorMessage');
+        modalErrorMessage.textContent = error.message || "Error connecting to server. Please try again.";
+        modalErrorMessage.classList.add('show');
+        
+        // Hide main result section and show modal
+        document.getElementById('resultSection').classList.remove('has-result');
+        document.getElementById('resultModal').classList.add('visible');
+      })
+      .finally(() => {
+        detectBtn.disabled = false;
+        detectBtn.innerHTML = '<i class="fas fa-search"></i> Detect Disease';
+      });
+    }
+
+    // --- Camera Functionality ---
+    let stream = null; // To store the camera stream
+
+    async function toggleInputMethod(method) {
+      const uploadInputDiv = document.getElementById('uploadInput');
+      const cameraInputDiv = document.getElementById('cameraInput');
+      const uploadTab = document.getElementById('uploadTab');
+      const cameraTab = document.getElementById('cameraTab');
+      const detectBtn = document.getElementById('detectBtn');
+      const imagePreviewDiv = document.getElementById('imagePreview');
+      const imageErrorDiv = document.getElementById('imageError');
+      const cameraErrorDiv = document.getElementById('cameraError');
+      const fileInput = document.getElementById('leafImage');
+      
+      // Reset UI and state
+      uploadInputDiv.style.display = 'none';
+      cameraInputDiv.style.display = 'none';
+      uploadTab.classList.remove('active');
+      cameraTab.classList.remove('active');
+      detectBtn.disabled = true; // Disable detect until input is ready
+      imagePreviewDiv.style.display = 'none';
+      imageErrorDiv.classList.remove('show');
+      cameraErrorDiv.classList.remove('show');
+      fileInput.value = ''; // Clear file input
+      
+      // Stop existing camera stream if any
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+
+      if (method === 'upload') {
+        uploadInputDiv.style.display = 'block';
+        uploadTab.classList.add('active');
+        // Detect button will be enabled by validateImage on file select
+      } else if (method === 'camera') {
+        cameraInputDiv.style.display = 'block';
+        cameraTab.classList.add('active');
+        detectBtn.disabled = true; // Keep disabled until photo is captured
+        await startCamera();
+      }
+       // Clear previous result display when switching input method
+      document.getElementById('resultSection').classList.remove('has-result');
+      document.getElementById('diseaseResult').textContent = '';
+      document.getElementById('diseaseConfidence').textContent = '';
+      document.getElementById('diseaseAdvice').textContent = '';
+    }
+
+    async function startCamera() {
+      const cameraFeed = document.getElementById('cameraFeed');
+      const cameraErrorDiv = document.getElementById('cameraError');
+      const captureBtn = document.getElementById('captureBtn');
+      
+      cameraErrorDiv.classList.remove('show');
+      cameraErrorDiv.textContent = '';
+      captureBtn.disabled = true; // Disable capture button initially
+
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); // Prefer rear camera
+        cameraFeed.srcObject = stream;
+        
+        cameraFeed.onloadedmetadata = () => {
+          cameraFeed.play();
+          captureBtn.disabled = false; // Enable capture button once video is playing
+        };
+
+      } catch (err) {
+        console.error('Error accessing camera:', err);
+        cameraErrorDiv.textContent = 'Could not access camera. Please ensure permissions are granted and a camera is available.';
+        cameraErrorDiv.classList.add('show');
+        captureBtn.disabled = true;
+      }
+    }
+
+    function captureImage() {
+      const cameraFeed = document.getElementById('cameraFeed');
+      const cameraCanvas = document.getElementById('cameraCanvas');
+      const imagePreviewDiv = document.getElementById('imagePreview');
+      const previewImg = document.getElementById('previewImg');
+      const detectBtn = document.getElementById('detectBtn');
+      const cameraErrorDiv = document.getElementById('cameraError');
+
+      if (!stream) {
+        cameraErrorDiv.textContent = 'Camera stream not available.';
+        cameraErrorDiv.classList.add('show');
+        return;
+      }
+
+      // Set canvas dimensions to match video feed
+      cameraCanvas.width = cameraFeed.videoWidth;
+      cameraCanvas.height = cameraFeed.videoHeight;
+
+      // Draw the current video frame onto the canvas
+      const context = cameraCanvas.getContext('2d');
+      context.drawImage(cameraFeed, 0, 0, cameraCanvas.width, cameraCanvas.height);
+
+      // Get the image data from the canvas
+      const imageDataUrl = cameraCanvas.toDataURL('image/jpeg', 0.9); // Get JPEG data with quality 0.9
+
+      // Display the captured image in the preview area
+      previewImg.src = imageDataUrl;
+      imagePreviewDiv.style.display = 'block';
+
+      // Convert data URL to Blob, then to File for sending to backend
+      const byteString = atob(imageDataUrl.split(',')[1]);
+      const mimeString = imageDataUrl.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], {type: mimeString});
+      const capturedFile = new File([blob], "captured_photo.jpg", { type: mimeString, lastModified: Date.now() });
+
+      // Attach the captured file to the form for submission
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(capturedFile);
+      document.getElementById('leafImage').files = dataTransfer.files;
+
+      // Enable the Detect button and indicate ready
+      detectBtn.disabled = false;
+      detectBtn.innerHTML = '<i class="fas fa-search"></i> Detect Disease';
+      
+      // Optionally stop the camera stream after capture
+      // stream.getTracks().forEach(track => track.stop());
+      // stream = null;
+    }
+
+    // --- Modal Functionality ---
+
+    function showResultModal(disease, confidence, advice) {
+        const modal = document.getElementById('resultModal');
+        const modalResultContent = document.getElementById('modalResultContent');
+        const modalErrorMessage = document.getElementById('modalErrorMessage');
+
+        // Clear previous content and error messages
+        modalResultContent.innerHTML = '';
+        modalErrorMessage.textContent = '';
+        modalErrorMessage.classList.remove('show');
+
+        if (disease || confidence || advice) {
+             // Format disease name for display
+            const diseaseName = disease ? disease.split('___')[1]?.replace(/_/g, ' ') || disease : 'N/A';
+
+            modalResultContent.innerHTML = `
+                <div class="modal-result-item">
+                    <i class="fas fa-bug"></i>
+                    <span class="label">Disease:</span>
+                    <span class="value">${diseaseName}</span>
+                </div>
+                <div class="modal-result-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="label">Confidence:</span>
+                    <span class="value">${confidence || 'N/A'}</span>
+                </div>
+                <div class="modal-result-item">
+                    <i class="fas fa-lightbulb"></i>
+                    <span class="label">Advice:</span>
+                    <span class="value">${advice || 'N/A'}</span>
+                </div>
+            `;
+        } else {
+            modalErrorMessage.textContent = "No results or error information received.";
+            modalErrorMessage.classList.add('show');
+        }
+
+        // Hide the original result section
+        document.getElementById('resultSection').classList.remove('has-result');
+
+        // Show the modal
+        modal.classList.add('visible');
+    }
+
+    function closeModal(event) {
+        // Close only if clicking the overlay or the close button, not the modal content itself
+        if (event && event.target !== event.currentTarget) {
+            return; // Click was inside modal content
+        }
+        document.getElementById('resultModal').classList.remove('visible');
+         // Optionally clear modal content on close
+        document.getElementById('modalResultContent').innerHTML = '';
+        document.getElementById('modalErrorMessage').textContent = '';
+        document.getElementById('modalErrorMessage').classList.remove('show');
+    }
+
+    // Initial state: show upload input
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleInputMethod('upload');
+    });
+  </script>
+</body>
+</html>
